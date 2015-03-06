@@ -1,4 +1,4 @@
-# $\Delta V_{xc}$: A method for rapid structure optimisation #
+# ΔV<sub>xc</sub>: A method for rapid structure optimisation #
 
 ## Introduction ##
 
@@ -22,4 +22,4 @@ Testing has largely been on unix-like filesystems; there may be some issues on W
 
 ## License ##
 
-$\Delta V_{xc}$ is developed by the Walsh Materials Design group of the Department of Chemistry at the University of Bath, UK. Python code is licensed under the GNU General Public License (GPL) v3.
+ΔV<sub>xc</sub> is developed by the Walsh Materials Design group of the Department of Chemistry at the University of Bath, UK. Python code is licensed under the GNU General Public License (GPL) v3.
