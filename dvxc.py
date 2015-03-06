@@ -14,46 +14,47 @@
 # The correct value (from a HSE 06 EoS fitting) is 52.97 A^3, and the pressure at the corrected volume is -2.03 kbar (-0.2 GPa).
 
 
-import csv;
-import math;
+import csv
+import math
 
-import numpy as np;
-import matplotlib as mpl;
-import matplotlib.pyplot as plt;
+import numpy as np
+import matplotlib as mpl
+import matplotlib.pyplot as plt
 
-from matplotlib.ticker import FuncFormatter;
-from scipy.optimize import curve_fit;
+from matplotlib.ticker import FuncFormatter
+from scipy.optimize import curve_fit
 
 from collections import namedtuple
 
 import interpolate_cell
 
-_EVPerCubicAngstromInGPa = 160.217656;
+_EVPerCubicAngstromInGPa = 160.217656
 
 
-mpl.rc('font', **{ 'family' : 'sans-serif', 'size' : 10, 'sans-serif' : 'Arial' });
-mpl.rc('lines', **{ 'linewidth' : 0.5 });
+mpl.rc('font', **{ 'family' : 'sans-serif', 'size' : 10, 'sans-serif' : 'Arial' })
+mpl.rc('lines', **{ 'linewidth' : 0.5 })
 
-_FontSize = 10;
+_FontSize = 10
 
-_Label1DpFormatter = FuncFormatter(lambda x, pos : "{0:.1f}".format(x));
+_Label1DpFormatter = FuncFormatter(lambda x, pos : "{0:.1f}".format(x))
 
 
 def murnaghan_fit(eData, vData, initialK0Guess = 50.0, initialK0PrimeGuess = 5.0):
     def _fit_equation(x, e0, v0, k0, kPrime0):
         return e0 + k0 * v0 * ((((x / v0) ** (1.0 - kPrime0)) / (kPrime0 * (kPrime0 - 1)))
-                               + (x / (kPrime0 * v0)) - (1 / (kPrime0 - 1)));
+                               + (x / (kPrime0 * v0)) - (1 / (kPrime0 - 1)))
 
-    minIndex = np.argmin(eData);
+    minIndex = np.argmin(eData)
 
-    e0Init = eData[minIndex];
-    v0Init = vData[minIndex];
+    e0Init = eData[minIndex]
+    v0Init = vData[minIndex]
 
-    (e0, v0, k0, kPrime0), pcov = curve_fit(_fit_equation, vData, eData, [e0Init, v0Init, initialK0Guess, initialK0PrimeGuess]);
-    eRMS = math.sqrt(np.mean((eData - _fit_equation(vData, e0, v0, k0, kPrime0)) ** 2));
+    (e0, v0, k0, kPrime0), pcov = curve_fit(_fit_equation, vData, eData,
+                                            [e0Init, v0Init, initialK0Guess, initialK0PrimeGuess])
+    eRMS = math.sqrt(np.mean((eData - _fit_equation(vData, e0, v0, k0, kPrime0)) ** 2))
 
     MurnaghanFit = namedtuple('MurnaghanFit', 'e0 v0 k0 kPrime0 eRMS')
-    return MurnaghanFit(e0, v0, k0, kPrime0, eRMS);
+    return MurnaghanFit(e0, v0, k0, kPrime0, eRMS)
 
 def murnaghan_pressure(v, fit):
     """Calculate the pressure given a volume and fitted parameters for a Murnaghan EOS
@@ -74,12 +75,6 @@ def murnaghan_pressure(v, fit):
     p = p * _EVPerCubicAngstromInGPa * 10 # Convert to kbar / A3
     return p
     
-
-def _ApplyDVxc_linear(pressure, vpPolyFit):
-    #COMMENT: pressure is the pressure of the "target" functional.
-    #COMMENT: vpPolyFit is the coefficients of a polynomial fit to *volume* as a function of *pressure*.
-    return np.polyval(vpPolyFit, 0.0) - np.polyval(vpPolyFit, pressure);
-
 def apply_dvxc_murnaghan(pressure, murnaghan_params):
     """
     Estimate volume change to minimise absolute pressure, given reference fit to Murnaghan EoS
@@ -266,8 +261,8 @@ def pretty_vectors(cell,padding=0):
     return pretty_string
                 
 def main(filename, pressure, current_volume):
-    #EoSData = "PbS-EoS-PBEsol.csv";
-    #TestFunctionalPressure = 26.24;
+    #EoSData = "PbS-EoS-PBEsol.csv"
+    #TestFunctionalPressure = 26.24
 
     EoSData = filename
     TestFunctionalPressure = pressure
@@ -293,7 +288,7 @@ def main(filename, pressure, current_volume):
         for v, e, p in zip(vValues, eValues, pValues):
             print("{0: >8.2f}    {1: >7.2f}    {2: >6.2f}".format(
                    v, e, p))
-        print('');
+        print('')
     elif data_file_width == 2:
         print("Importing data from Volume-Energy table")
         vValues, eValues = import_VE(EoSData)
@@ -312,29 +307,29 @@ def main(filename, pressure, current_volume):
         pValues = False
 
         headerLine = "{0: >8}    {1: >7}".format("V / A^3", "E / eV")
-        print(headerLine);
-        print("-" * len(headerLine));
+        print(headerLine)
+        print("-" * len(headerLine))
         for v, e in zip(vValues, eValues):
-            print("{0: >8.2f}    {1: >7.2f}".format(v, e));
+            print("{0: >8.2f}    {1: >7.2f}".format(v, e))
         print('')
     else:
         print("Data file type not recognised")
         return False
-    print('');
+    print('')
 
 
-    print("Performing EoS fit...");
+    print("Performing EoS fit...")
 
-    murnaghan_params = murnaghan_fit(eValues, vValues);
-    print("  -> V0 = {0:.2f} A^3".format(murnaghan_params.v0));
-    print("  -> E0 = {0:.2f} eV".format(murnaghan_params.e0));
-    print("  -> K0 = {0:.2f} GPa".format(murnaghan_params.k0 * _EVPerCubicAngstromInGPa));
-    print("  -> K'0 = {0:.2f}".format(murnaghan_params.kPrime0));
-    print("  -> RMS = {0:.2e}".format(murnaghan_params.eRMS));
+    murnaghan_params = murnaghan_fit(eValues, vValues)
+    print("  -> V0 = {0:.2f} A^3".format(murnaghan_params.v0))
+    print("  -> E0 = {0:.2f} eV".format(murnaghan_params.e0))
+    print("  -> K0 = {0:.2f} GPa".format(murnaghan_params.k0 * _EVPerCubicAngstromInGPa))
+    print("  -> K'0 = {0:.2f}".format(murnaghan_params.kPrime0))
+    print("  -> RMS = {0:.2e}".format(murnaghan_params.eRMS))
 
-    print('');
+    print('')
 
-    print("Performing dVxc...");
+    print("Performing dVxc...")
 
 
     DVxc_Murnaghan = apply_dvxc_murnaghan(pressure, murnaghan_params)
@@ -353,21 +348,21 @@ def main(filename, pressure, current_volume):
               "the target volume. \n")
     elif lattice_vectors and current_volume:
         target_volume = current_volume + DVxc_Murnaghan
-        new_cell = estimate_vectors(lattice_vectors, target_volume,
-                                    vValues, verbose=True)
+        estimate_vectors(lattice_vectors, target_volume,
+                         vValues, verbose=True)
     
     if pValues != False:
-        print("Saving a plot of the dVxc EoS fit to \"Fit.png\"...");
-        _SaveVPFitPlot(pValues, vValues, murnaghan_params, "Fit.png");
+        print("Saving a plot of the dVxc EoS fit to \"Fit.png\"...")
+        _SaveVPFitPlot(pValues, vValues, murnaghan_params, "Fit.png")
     
-        print('');        
+        print('')        
 
-    print("Thank you for using dVxc!");
-    print('');
+    print("Thank you for using dVxc!")
+    print('')
     
-    print("There isn't a dVxc paper yet, but in the meantime you could cite:");
-    print("J. Buckeridge et al., Comp. Phys. Commun. 185, 330-338 (2014)");
-    print('');
+    print("There isn't a dVxc paper yet, but in the meantime you could cite:")
+    print("J. Buckeridge et al., Comp. Phys. Commun. 185, 330-338 (2014)")
+    print('')
 
 if __name__ == "__main__":
     try:
