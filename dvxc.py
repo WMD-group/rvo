@@ -28,7 +28,7 @@ from collections import namedtuple
 
 import interpolate_cell
 
-_EVPerCubicAngstromInGPa = 160.217656
+EVPerCubicAngstromInGPa = 160.217656
 
 
 mpl.rc('font', **{ 'family' : 'sans-serif', 'size' : 10, 'sans-serif' : 'Arial' })
@@ -72,7 +72,7 @@ def murnaghan_pressure(v, fit):
 
     """
     p = (fit.k0/fit.kPrime0) * ((fit.v0 / v) ** fit.kPrime0 - 1)
-    p = p * _EVPerCubicAngstromInGPa * 10 # Convert to kbar / A3
+    p = p * EVPerCubicAngstromInGPa * 10 # Convert to kbar / A3
     return p
     
 def apply_dvxc_murnaghan(pressure, murnaghan_params):
@@ -94,7 +94,7 @@ def apply_dvxc_murnaghan(pressure, murnaghan_params):
     
     """
     m = -murnaghan_params.k0 / murnaghan_params.v0
-    m = m *_EVPerCubicAngstromInGPa * 10 # Convert to kbar / A3
+    m = m *EVPerCubicAngstromInGPa * 10 # Convert to kbar / A3
     return -pressure/m
 
 def _SaveVPFitPlot(pValues, vValues, murnaghan_params, fileName):
@@ -108,7 +108,7 @@ def _SaveVPFitPlot(pValues, vValues, murnaghan_params, fileName):
     fitOverlayValues = np.linspace(xMin * 10.0, xMax * 10.0, 100)
     
     e0, v0, k0, kPrime0, eRMS = murnaghan_params
-    murnaghan_pValues = (k0/kPrime0)*((vValues/v0)**(-kPrime0) -1) * _EVPerCubicAngstromInGPa
+    murnaghan_pValues = (k0/kPrime0)*((vValues/v0)**(-kPrime0) -1) * EVPerCubicAngstromInGPa
     plt.plot(murnaghan_pValues, vValues, color = 'k', marker = 'x', markersize = 3,
              linestyle = 'none', label = "Murnaghan fit")
     
@@ -323,7 +323,7 @@ def main(filename, pressure, current_volume):
     murnaghan_params = murnaghan_fit(eValues, vValues)
     print("  -> V0 = {0:.2f} A^3".format(murnaghan_params.v0))
     print("  -> E0 = {0:.2f} eV".format(murnaghan_params.e0))
-    print("  -> K0 = {0:.2f} GPa".format(murnaghan_params.k0 * _EVPerCubicAngstromInGPa))
+    print("  -> K0 = {0:.2f} GPa".format(murnaghan_params.k0 * EVPerCubicAngstromInGPa))
     print("  -> K'0 = {0:.2f}".format(murnaghan_params.kPrime0))
     print("  -> RMS = {0:.2e}".format(murnaghan_params.eRMS))
 

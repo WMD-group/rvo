@@ -9,15 +9,14 @@ import os
 import csv;
 import math;
 import numpy as np;
-from scipy.optimize import curve_fit;
 from collections import namedtuple
 
 import matplotlib as mpl;
 import matplotlib.pyplot as plt;
-from matplotlib.ticker import FuncFormatter;
-from mpl_toolkits.axes_grid.anchored_artists import AnchoredText;
+# from matplotlib.ticker import FuncFormatter
 
 import dvxc
+from dvxc import EVPerCubicAngstromInGPa
 
 ### set up data files ###
 
@@ -52,6 +51,8 @@ functional_markers = { 'LDA' : "^", 'PW91' : "o", 'PBE' : "s", 'PBEsol' : "D",
                        'TPSS' : "x", 'revTPSS' : "p", 'PBE+D2' : "+" ,
                        'B3LYP' : "<", 'HSE06' : ">"};
 
+iter_plot_bar_hatches = [None, "//", "/", "---", 'o', 'oo'];
+
 # Global initialisation of Matplotlib settings and variables/objects; the font
 # size is kept as a variable, because calls to plt.legend() don't seem to use
 # the rc settings.  COMMENT: Note that the line width *is* hard-coded in
@@ -60,39 +61,7 @@ functional_markers = { 'LDA' : "^", 'PW91' : "o", 'PBE' : "s", 'PBEsol' : "D",
 mpl.rc('font', **{ 'family' : 'sans-serif', 'size' : 10, 
                    'sans-serif' : 'Arial' })
 mpl.rc('lines', **{ 'linewidth' : 0.5 })
-
 font_size = 10
-
-# _Label1DpFormatter = FuncFormatter(lambda x, pos : "{0:.1f}".format(x));
-
-
-
-### Other setup parameters ###
-
-iter_plot_bar_hatches = [None, "//", "/", "---", 'o', 'oo'];
-
-# DoVolumeChangeTest = True;
-# DoIterativeApplicationTest = True;
-
-# #COMMENT: Initial guesses of K0 and K0', used in the Murnaghan fit.
-
-# _InitialK0Guess = 50.0;
-# _InitialK0PrimeGuess = _InitialK0Guess / 10.0
-
-# #COMMENT: Try Googling for "1 ev per cubic angstrom in gigapascals" (!).
-_EVPerCubicAngstromInGPa = 160.217656
-
-# #COMMENT: Polynomial orders for the V(P) curve fitting when applying the dPx algorithm.
-
-# _VPFitPolynomialOrders = [1, 2, 3];
-
-# #COMMENT: Polynomial order to use for the iterative dPx application test.
-
-# _IterativeApplicationTestPolynomialOrder = 1;
-
-# #COMMENT: Polynomial order for the P(V) curve fitting used to predict what pressure a test functional would give for a trial unit cell volume.
-
-# _TestPressureInterpolationOrder = 3;
 
 def main(verbosity=False, to_plot=["none"], 
          to_write=["none"], compounds=False, compact=False):
@@ -113,13 +82,14 @@ def main(verbosity=False, to_plot=["none"],
     if "none" in to_write:
         to_write = ["none"]
 
-    ### Trim down data_sets if requested: ### n
+    ### Trim down data_sets if requested: ###
     global data_sets # Python is weird about global variables:
                      # this line is needed by the "if" statement but not the
                      # "for" loop!
     if compounds:
         data_sets = [entry for entry in data_sets if entry[0] in compounds]
 
+    # Main loop: Simulated DVXC over selected materials
     for output_prefix, filename in data_sets:
         ### Import data and find optimal volumes ###
         print("Processing: {0}\n".format(filename))
@@ -151,7 +121,7 @@ def main(verbosity=False, to_plot=["none"],
                 for functional in functionals:
                     fit = eos_fits[functional]
                     csv_writer.writerow([functional, fit.e0, fit.v0,
-                                         fit.k0 * _EVPerCubicAngstromInGPa,
+                                         fit.k0 * EVPerCubicAngstromInGPa,
                                          fit.kPrime0, fit.eRMS])
 
         ### Carry out delta p xc method for all functionals ###
@@ -904,3 +874,4 @@ if __name__ == "__main__":
 
     main(verbosity=args.verbose, to_plot=args.plot, to_write=args.write,
          compounds=args.material, compact=args.compact)
+    
