@@ -261,11 +261,8 @@ def pretty_vectors(cell,padding=0):
     return pretty_string
                 
 def main(filename, pressure, current_volume):
-    #EoSData = "PbS-EoS-PBEsol.csv"
-    #TestFunctionalPressure = 26.24
 
     EoSData = filename
-    TestFunctionalPressure = pressure
 
     print("Reading EoS from \"{0}\"...".format(EoSData))
     # Check input file format: note that row[0][0] is used to check
