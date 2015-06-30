@@ -6,13 +6,13 @@
 from __future__ import print_function
 
 import os
-import csv;
-import math;
-import numpy as np;
+import csv
+import math
+import numpy as np
 from collections import namedtuple
 
-import matplotlib as mpl;
-import matplotlib.pyplot as plt;
+import matplotlib as mpl
+import matplotlib.pyplot as plt
 # from matplotlib.ticker import FuncFormatter
 
 import dvxc
@@ -20,19 +20,12 @@ from dvxc import EVPerCubicAngstromInGPa
 
 ### set up data files ###
 
-src_dir = os.path.dirname(__file__)
-# Append a trailing slash to make coherent directory name - this would select
-# the root directory in the case of no prefix, so we need to check
-if src_dir:
-    src_dir = src_dir + '/'
-data_dir = src_dir + '../data/'
-
-data_sets = [
-    ("PbS", data_dir + u"PbS-EVPData.csv"),
-    ("PbTe", data_dir + u"PbTe-EVPData.csv"),
-    ("ZnS", data_dir + u"ZnS-EVPData.csv"),
-    ("ZnTe", data_dir +u"ZnTe-EVPData.csv")
-    ];
+# src_dir = os.path.dirname(__file__)
+# # Append a trailing slash to make coherent directory name - this would select
+# # the root directory in the case of no prefix, so we need to check
+# if src_dir:
+#     src_dir = src_dir + '/'
+# data_dir = src_dir + '../data/'
 
 ### Plotting configuration ###
 functional_colours = {
@@ -45,13 +38,13 @@ functional_colours = {
     'PBE+D2'  : (  0, 176, 240),
     'B3LYP'   : (100, 100,  50),
     'HSE06'   : ( 50, 80,  50)
-    };
+    }
 
 functional_markers = { 'LDA' : "^", 'PW91' : "o", 'PBE' : "s", 'PBEsol' : "D", 
                        'TPSS' : "x", 'revTPSS' : "p", 'PBE+D2' : "+" ,
-                       'B3LYP' : "<", 'HSE06' : ">"};
+                       'B3LYP' : "<", 'HSE06' : ">"}
 
-iter_plot_bar_hatches = [None, "//", "/", "---", 'o', 'oo'];
+iter_plot_bar_hatches = [None, "//", "/", "---", 'o', 'oo']
 
 # Global initialisation of Matplotlib settings and variables/objects; the font
 # size is kept as a variable, because calls to plt.legend() don't seem to use
@@ -63,9 +56,22 @@ mpl.rc('font', **{ 'family' : 'sans-serif', 'size' : 10,
 mpl.rc('lines', **{ 'linewidth' : 0.5 })
 font_size = 10
 
-def main(verbosity=False, to_plot=["none"], 
-         to_write=["none"], compounds=False, compact=False):
+global data_dir
 
+def main(verbosity=False, to_plot=["none"], data_dir="",
+         to_write=["none"], compounds=False, compact=False):
+    
+    if data_dir[-1] != '/':
+        data_dir += '/'
+    
+    all_data_sets = [
+        ("PbS", data_dir + u"PbS-EVPData.csv"),
+        ("PbTe", data_dir + u"PbTe-EVPData.csv"),
+        ("ZnS", data_dir + u"ZnS-EVPData.csv"),
+        ("ZnTe", data_dir +u"ZnTe-EVPData.csv")
+        ]
+
+    
     ### Set up verbose printing ###
     if verbosity:
         def vprint(*args):
@@ -83,11 +89,13 @@ def main(verbosity=False, to_plot=["none"],
         to_write = ["none"]
 
     ### Trim down data_sets if requested: ###
-    global data_sets # Python is weird about global variables:
-                     # this line is needed by the "if" statement but not the
-                     # "for" loop!
+    # global data_sets # Python is weird about global variables:
+    #                  # this line is needed by the "if" statement but not the
+    #                  # "for" loop!
     if compounds:
-        data_sets = [entry for entry in data_sets if entry[0] in compounds]
+        data_sets = [entry for entry in all_data_sets if entry[0] in compounds]
+    else:
+        data_sets = all_data_sets
 
     # Main loop: Simulated DVXC over selected materials
     for output_prefix, filename in data_sets:
@@ -101,7 +109,7 @@ def main(verbosity=False, to_plot=["none"],
             murnaghan_params = dvxc.murnaghan_fit(data[functional].e_values,
                                                   data[functional].v_values)
             vprint("    -> {0}: {1:.2f} A^3 (RMS = {2:.2e})".format(
-                functional, murnaghan_params.v0, murnaghan_params.eRMS));
+                functional, murnaghan_params.v0, murnaghan_params.eRMS))
             eos_fits[functional] = murnaghan_params
         vprint("\n")
 
@@ -379,9 +387,9 @@ def plot_EVP_data(functionals, evp_data, eos_fits, plot_filename=False,
                      marker=marker, fillstyle='none')
 
             x_min = np.min(v_values_adjusted) if not x_min \
-                    else min(x_min, np.min(v_values_adjusted));
+                    else min(x_min, np.min(v_values_adjusted))
             x_max = np.max(v_values_adjusted) if not x_max \
-                    else max(x_max, np.max(v_values_adjusted));
+                    else max(x_max, np.max(v_values_adjusted))
 
         plt.xlabel(r"$V - V_{0}$ / $\AA^{3}$", fontweight = 'bold')
         plt.ylabel("$E - E_{0}$ / eV", fontweight = 'bold')
@@ -443,9 +451,9 @@ def plot_EVP_data(functionals, evp_data, eos_fits, plot_filename=False,
             (r,g,b), marker = (functional_colours[functional], 
                                functional_markers[functional])
             x_min = np.min(v_values_adjusted) if not x_min \
-                    else min(x_min, np.min(v_values_adjusted));
+                    else min(x_min, np.min(v_values_adjusted))
             x_max = np.max(v_values_adjusted) if not x_max \
-                    else max(x_max, np.max(v_values_adjusted));
+                    else max(x_max, np.max(v_values_adjusted))
 
             plt.plot(evp_data[functional].v_values - eos_fits[functional].v0,
                      evp_data[functional].p_values / 10.0,
@@ -674,13 +682,13 @@ def plot_iterative_results(functionals, iter_results, eos_fits,
 
         plt.xticks([value + (bar_width * n_bars) / 2.0 for value in left_edges_base], 
                    [f for f in functionals if f != test_functional], 
-                   rotation = 30, ha='center');
+                   rotation = 30, ha='center')
 
         # plt.xlim(0.0, left_edges_base[-1] + 
-        #                 n_bars * bar_width + bar_width);
+        #                 n_bars * bar_width + bar_width)
         plt.xlim(0.0, left_edges_base[-1])
 
-        subplot_axes.append(plt.gca());
+        subplot_axes.append(plt.gca())
 
 
     for axes in subplot_axes:
@@ -852,7 +860,8 @@ def plot_bandgaps(materials,do_plot=True,do_write=False,plot_filename=False,
 
 if __name__ == "__main__":
     import argparse
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description="Simulate application of DVXC method to a dataset of binary chalcogenides.")
+    parser.add_argument("data_directory", help="path to 'binary_chalcogenides' folder")
     parser.add_argument("-v", "--verbose", help="increase output verbosity",
                         action="store_true")
     parser.add_argument("-p", "--plot", 
@@ -872,6 +881,6 @@ if __name__ == "__main__":
                         help="Output compact versions of some plots")
     args = parser.parse_args()
 
-    main(verbosity=args.verbose, to_plot=args.plot, to_write=args.write,
+    main(data_dir=args.data_directory, verbosity=args.verbose, to_plot=args.plot, to_write=args.write,
          compounds=args.material, compact=args.compact)
     
