@@ -8,8 +8,10 @@ This is still work in progress.
 
 * **dvxc.py** The main program file. May be used interactively, uses argparse for optional arguments.
 
-* **dvxc_stats.py** Simulates the use of $\Delta V_{xc}$ with large sets of energy-volume curves.
-  Used to generate the figures for an in-progress research paper. Data files will be released on publication.
+* **dvxc_stats.py** Simulates the use of ΔV<sub>xc</sub> with large sets of energy-volume curves.
+Used to generate the figures for an in-progress research paper. Data files will be released on publication.
+
+* **ase_generate_input.py** Generates an energy-volume curve for use with dvxc.py, given a set of crystal structure files. Supports [file formats known to ASE](https://wiki.fysik.dtu.dk/ase/ase/io.html#module-ase.io).
 
 * **interpolate_cell.py** Collection of functions used to interpolate lattice vectors to a target volume.
 
@@ -19,6 +21,8 @@ This is still work in progress.
 
 Python 2.7 with Numpy, Scipy and Matplotlib.
 Testing has largely been on unix-like filesystems; there may be some issues on Windows relating to file paths.
+
+The [Atomic Simulation Environment](https://wiki.fysik.dtu.dk/ase/) (ASE) is required for the "ase_generate_input" program.
 
 ## License ##
 
