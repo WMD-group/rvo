@@ -2,20 +2,22 @@
 
 ## Introduction ##
 
-This is still work in progress.
+Code for crystal structure optimisation, and a reference implementation for method to be published.
 
 ## Contents ##
 
-* **dvxc.py** The main program file. May be used interactively, uses argparse for optional arguments.
+* **dvxc.py** The main program file. May be used interactively; run `dvxc -h` for usage information.
 
 * **dvxc_stats.py** Simulates the use of ΔV<sub>xc</sub> with large sets of energy-volume curves.
-Used to generate the figures for an in-progress research paper. Data files will be released on publication.
+Used to generate the figures for an in-progress research paper. Data files will be released on publication. Run `dvxc -h` for usage information.
 
 * **ase_generate_input.py** Generates an energy-volume curve for use with dvxc.py, given a set of crystal structure files. Supports [file formats known to ASE](https://wiki.fysik.dtu.dk/ase/ase/io.html#module-ase.io).
 
 * **interpolate_cell.py** Collection of functions used to interpolate lattice vectors to a target volume.
 
-* **data/(files).dat** Cu4SnS4.dvxc.dat provided as test/example for the time being. Will be populated with research data upon publication in an academic journal
+* **data/(files).dat** Cu4SnS4.dvxc.dat provided as test/example for the time being.
+
+* **interpolation_scheme.{tex,pdf}** Supporting information; mathematical derivation of interpolation scheme used by **interpolate_cell.py**.
 
 ## Requirements ##
 

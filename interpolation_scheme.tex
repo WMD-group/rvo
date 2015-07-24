@@ -1,0 +1,98 @@
+\documentclass{article}
+
+\usepackage{amsmath}
+
+\newcommand\ap{\vec{a}^\prime}
+\newcommand\app{\vec{a}^{\prime\prime}}
+\newcommand\bp{\vec{b}^\prime}
+\newcommand\bpp{\vec{b}^{\prime\prime}}
+\newcommand\cp{\vec{c}^\prime}
+\newcommand\cpp{\vec{c}^{\prime\prime}}
+
+\begin{document}
+
+\title{Interpolation scheme for lattice vectors}
+\author{Adam J. Jackson}
+\date{}
+
+\maketitle
+
+As part of the application of the $\Delta V_{xc}$ method, it is necessary to generate a unit cell of target volume.
+While the parameters may be optimised with an \emph{ab initio} calculation, the goal of $\Delta V_{xc}$ is to reduce computational cost and hence we should use the available information to minimise this.
+Therefore we suggest linear interpolation between the surrounding minimised cells on the precalculated E-V curve.
+The unit cell matrix contains a set of lattice vectors:
+\begin{equation}
+\mathbf{R} = \left[ \begin{array}{c} \vec{a} \\ \vec{b} \\ \vec{c}\end{array} \right]
+ = \left[ \begin{array}{ccc} a_x & a_y & a_z \\ b_x & b_y & b_z \\ c_x & c_y & c_z \end{array} \right]
+\end{equation}
+If we are to interpolate between two precalculated lattices $\mathbf{R}^\prime$ and $\mathbf{R}^{\prime\prime}$,
+then we label their lattice vectors $\ap, \bp, \cp$ and $\app, \bpp, \cpp$. The interpolated lattice $\mathbf{R} = \mathbf{R}^\prime + \lambda(\mathbf{R}^{\prime\prime} - \mathbf{R}^\prime)$, where $\lambda$ is the shared scaling parameter for interpolation. 
+When lambda has been determined, the same process might be applied to atomic positions for an improved estimate.
+
+The challenge then becomes to determine $\lambda = f(V,\mathbf{R}^\prime, \mathbf{R}^{\prime\prime})$.
+The volume of a lattice unit cell,
+
+\begin{align}
+V &= \left| \vec{a} \cdot \left( \vec{b} \times \vec{c} \right) \right|. \\
+\intertext{For the interpolated cell, therefore:}
+V &= \left| \left( (1-\lambda)\ap + \lambda \app \right) \cdot \left[ \left( (1-\lambda) \bp + \lambda \bpp \right) \times \left( (1-\lambda) \cp + \lambda \cpp \right) \right] \right| \\
+V &= \left| \left( (1-\lambda)\ap + \lambda \app \right) \cdot
+    \left[\begin{array}{l}
+      (1-\lambda)\bp \times (1-\lambda)\cp + (1-\lambda) \bp \times \lambda \cpp \\
+      + \quad \lambda \bpp \times (1-\lambda)\cp + \lambda \bpp \times \lambda \cpp
+    \end{array}\right]  \right| \\
+V &= \left| \left( (1-\lambda)\ap + \lambda \app \right) \cdot
+    \left[\begin{array}{l}
+      (1-\lambda)^2 \bp \times \cp + \lambda(1-\lambda) \bp \times \cpp \\
+      + \quad \lambda(1-\lambda) \bpp \times \cp + \lambda^2 \bpp \times \cpp
+    \end{array}\right] \right| \\
+V &= \left| \begin{array}{l} (1-\lambda)\ap \cdot
+    \left[\begin{array}{l}
+      (1-\lambda)^2 \bp \times \cp + \lambda(1-\lambda) \bp \times \cpp \\
+      + \quad \lambda(1-\lambda) \bpp \times \cp + \lambda^2 \bpp \times \cpp
+    \end{array}\right] \\
+ \quad + \quad \lambda \app \cdot
+    \left[\begin{array}{l}
+      (1-\lambda)^2 \bp \times \cp + \lambda(1-\lambda) \bp \times \cpp \\
+      + \quad \lambda(1-\lambda) \bpp \times \cp + \lambda^2 \bpp \times \cpp
+    \end{array}\right] \end{array}\right| \\
+V &= \left| \left[ \begin{array}{c}
+(1-\lambda)^3 \\ \lambda(1-\lambda)^2 \\ \lambda(1-\lambda)^2 \\
+\lambda^2(1-\lambda) \\ \lambda(1-\lambda)^2 \\ \lambda^2(1-\lambda) \\
+\lambda^2(1-\lambda) \\ \lambda^3
+\end{array} \right] \cdot
+%
+\left[ \begin{array}{c}
+\ap \cdot \bp \times \cp \\
+\ap \cdot \bp \times \cpp \\
+\ap \cdot \bpp \times \cp \\
+\ap \cdot \bpp \times \cpp \\
+\app \cdot \bp \times \cp \\
+\app \cdot \bp \times \cpp \\
+\app \cdot \bpp \times \cp \\
+\app \cdot \bpp \times \cpp
+\end{array} \right]
+%
+\right| 
+\end{align}
+%
+If we denote the right-hand vector containing all the volume permutations as $\vec{x}$,
+we can express this as a simple (albeit cumbersome) cubic equation.
+\begin{align}
+V &= \left| \begin{array}{l}  x_1(1 - \lambda)^3 + (x_2 + x_3 + x_5) \lambda(1-\lambda)^2 \\
+\quad + (x_4 + x_6 + x_7)\lambda^2(1-\lambda) + x_8 \lambda^3 \end{array}\right|\\
+V &= \left| \begin{array}{l}
+x_1(-\lambda^3 + 3\lambda^2 - 3\lambda + 1) \\
+ + \quad (x_2 + x_3 + x_5)(\lambda^3 - 2\lambda^2 + \lambda) \\
++ \quad (x_4 + x_6 + x_7)(\lambda^2 - \lambda^3)
+\quad + x_8(\lambda^3)
+\end{array}\right| \\
+V&= \left| \begin{array}{l}
+(-x_1+x_2+x_3-x_4+x_5-x_6-x_7+x_8)\lambda^3 \\
++\quad (3x_1 - 2x_2 - 2x_3 + x_4 -2x_5 + x_6 + x_7) \lambda^2\\
++\quad (-3x_1 + x_2 + x_3 + x_5) \lambda \\
++\quad (x_1)\cdot 1
+\end{array}\right|
+\end{align}
+This equation is solved by standard numerical methods to provide the suggested lattice vectors. A real value of $\lambda$ is required for a physically-meaningful solution, and a positive value is preferred.
+\end{document}
