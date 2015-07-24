@@ -17,7 +17,7 @@ Used to generate the figures for an in-progress research paper. Data files will 
 
 * **data/(files).dat** Cu4SnS4.dvxc.dat provided as test/example for the time being.
 
-* **interpolation_scheme.{tex,pdf}** Supporting information; mathematical derivation of interpolation scheme used by **interpolate_cell.py**.
+* **interpolation_scheme.pdf** Supporting information; mathematical derivation of interpolation scheme used by **interpolate_cell.py**. The LaTeX source file also provided.
 
 ## Requirements ##
 
