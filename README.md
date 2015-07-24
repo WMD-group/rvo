@@ -1,5 +1,7 @@
 # ΔV<sub>xc</sub>: A method for rapid structure optimisation #
 
+[![DOI](https://zenodo.org/badge/14127/WMD-Bath/dvxc.svg)](https://zenodo.org/badge/latestdoi/14127/WMD-Bath/dvxc)
+
 ## Introduction ##
 
 Code for crystal structure optimisation, and a reference implementation for method to be published.
