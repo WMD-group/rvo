@@ -58,9 +58,10 @@ font_size = 10
 
 global data_dir
 
-def main(verbosity=False, to_plot=["none"], data_dir="",
+def main(verbosity=False, to_plot=["none"], data_path="",
          to_write=["none"], compounds=False, compact=False):
-    
+    global data_dir
+    data_dir = data_path
     if data_dir[-1] != '/':
         data_dir += '/'
     
@@ -420,7 +421,7 @@ def plot_EVP_data(functionals, evp_data, eos_fits, plot_filename=False,
                      marker = marker, fillstyle = 'none' )
        
     plt.xlabel(r"$V$ / $\AA^{3}$", fontweight = 'bold')
-    plt.ylabel("$p_{ext}$ / GPa", fontweight = 'bold')
+    plt.ylabel("$P$ / GPa", fontweight = 'bold')
     axes = plt.gca()
     handles, labels = axes.get_legend_handles_labels()
 
@@ -462,7 +463,7 @@ def plot_EVP_data(functionals, evp_data, eos_fits, plot_filename=False,
                      marker=marker, fillstyle='none')
    
         plt.xlabel(r"$V - V_{0}$ / $\AA^{3}$", fontweight = 'bold')
-        plt.ylabel("$p_{ext}$ / GPa", fontweight = 'bold')
+        plt.ylabel("$P$ / GPa", fontweight = 'bold')
         plot_x_min = math.floor(x_min / x_tick_spacing) * x_tick_spacing
         plot_x_max = math.ceil(x_max / x_tick_spacing) * x_tick_spacing
         plt.xlim(plot_x_min, plot_x_max)
@@ -677,7 +678,7 @@ def plot_iterative_results(functionals, iter_results, eos_fits,
         if mode == 'volume':
             plt.ylabel(r"abs($\Delta V$) / %", fontweight = 'bold')
         elif mode == 'pressure':
-            plt.ylabel(r"abs($p$) / GPa", fontweight = 'bold')
+            plt.ylabel(r"$\mathrm{abs}(P)$ / GPa", fontweight = 'bold')
 
 
         plt.xticks([value + (bar_width * n_bars) / 2.0 for value in left_edges_base], 
@@ -828,7 +829,7 @@ def plot_bandgaps(materials,do_plot=True,do_write=False,plot_filename=False,
                 y = data[functional][material].eg
 
                 plt.plot(x,y, label=material,
-                         color=colours[material], marker=markers[material])
+                         color=colours[material], marker=markers[material], linestyle='none')
                 collect_factors += data[functional][material].factor
                 collect_eg += data[functional][material].eg
 
@@ -881,6 +882,6 @@ if __name__ == "__main__":
                         help="Output compact versions of some plots")
     args = parser.parse_args()
 
-    main(data_dir=args.data_directory, verbosity=args.verbose, to_plot=args.plot, to_write=args.write,
+    main(data_path=args.data_directory, verbosity=args.verbose, to_plot=args.plot, to_write=args.write,
          compounds=args.material, compact=args.compact)
     
