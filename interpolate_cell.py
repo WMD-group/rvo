@@ -7,6 +7,8 @@ def interpolate_cell(cell1,cell2,Lambda):
     """
     Generate interpolated set of lattice vectors R = R' + Lambda(R"-R')
 
+    For mathematical basis, see "interpolation_scheme.pdf", included in the dvxc source directory.
+
     arguments:
         cell1, cell2: 3x3 numpy arrays of lattice vectors
         Lambda: scalar parameter of interpolation (usually between 0 and 1)
