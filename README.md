@@ -1,17 +1,17 @@
-# ΔV<sub>xc</sub>: A method for rapid structure optimisation #
+# RVO: Rapid volume optimisation with an auxiliary equation of state #
 
 ## Introduction ##
 
-This is still work in progress.
+This is supporting information and a reference implemention of the RVO method.
 
 ## Contents ##
 
-* **dvxc.py** The main program file. May be used interactively, uses argparse for optional arguments.
+* **rvo.py** The main program file. May be used interactively, uses argparse for optional arguments.
 
-* **dvxc_stats.py** Simulates the use of ΔV<sub>xc</sub> with large sets of energy-volume curves.
-Used to generate the figures for an in-progress research paper. Data files will be released on publication.
+* **rvo_stats.py** Simulates the use of RVO with large sets of energy-volume curves.
+Used to generate the figures for a research paper. Data files will be released on publication.
 
-* **ase_generate_input.py** Generates an energy-volume curve for use with dvxc.py, given a set of crystal structure files. Supports [file formats known to ASE](https://wiki.fysik.dtu.dk/ase/ase/io.html#module-ase.io).
+* **ase_generate_input.py** Generates an energy-volume curve for use with rvo.py, given a set of crystal structure files. Supports [file formats known to ASE](https://wiki.fysik.dtu.dk/ase/ase/io.html#module-ase.io).
 
 * **interpolate_cell.py** Collection of functions used to interpolate lattice vectors to a target volume.
 
@@ -26,4 +26,4 @@ The [Atomic Simulation Environment](https://wiki.fysik.dtu.dk/ase/) (ASE) is req
 
 ## License ##
 
-ΔV<sub>xc</sub> is developed by the Walsh Materials Design group of the Department of Chemistry at the University of Bath, UK. Python code is licensed under the GNU General Public License (GPL) v3.
+RVO is developed by the Walsh Materials Design group of the Department of Chemistry at the University of Bath, UK. Python code is licensed under the GNU General Public License (GPL) v3.

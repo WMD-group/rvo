@@ -1,11 +1,10 @@
 #! /usr/bin/env python
 
-# dvxc_stats.py
-# Copyright 2014 Adam J. Jackson and Jonathan M. Skelton
+# rvo_stats.py
+# Copyright 2015 Adam J. Jackson and Jonathan M. Skelton
 
 from __future__ import print_function
 
-import os
 import csv
 import math
 import numpy as np
@@ -15,8 +14,8 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 # from matplotlib.ticker import FuncFormatter
 
-import dvxc
-from dvxc import EVPerCubicAngstromInGPa
+import rvo
+from rvo import EVPerCubicAngstromInGPa
 
 ### set up data files ###
 
@@ -98,7 +97,7 @@ def main(verbosity=False, to_plot=["none"], data_path="",
     else:
         data_sets = all_data_sets
 
-    # Main loop: Simulated DVXC over selected materials
+    # Main loop: Simulated RVO over selected materials
     for output_prefix, filename in data_sets:
         ### Import data and find optimal volumes ###
         print("Processing: {0}\n".format(filename))
@@ -107,7 +106,7 @@ def main(verbosity=False, to_plot=["none"], data_path="",
         vprint("  -> Determining Veq by Murnaghan fitting...")
         eos_fits = {}
         for functional in functionals:
-            murnaghan_params = dvxc.murnaghan_fit(data[functional].e_values,
+            murnaghan_params = rvo.murnaghan_fit(data[functional].e_values,
                                                   data[functional].v_values)
             vprint("    -> {0}: {1:.2f} A^3 (RMS = {2:.2e})".format(
                 functional, murnaghan_params.v0, murnaghan_params.eRMS))
@@ -133,11 +132,11 @@ def main(verbosity=False, to_plot=["none"], data_path="",
                                          fit.k0 * EVPerCubicAngstromInGPa,
                                          fit.kPrime0, fit.eRMS])
 
-        ### Carry out delta p xc method for all functionals ###
-        print("  -> Applying Delta V xc correction to all " + 
+        ### Carry out RVO method for all functionals ###
+        print("  -> Applying RVO correction to all " + 
               "combinations of functionals...")
-        DvxcResult = namedtuple('DvxcResult', 'functional delta_v residual_p')
-        dvxc_results={}
+        RvoResult = namedtuple('RvoResult', 'functional delta_v residual_p')
+        rvo_results={}
         for test_functional in functionals:
             initial_v_values = data[test_functional].v_values
             initial_p_values = data[test_functional].p_values
@@ -145,19 +144,19 @@ def main(verbosity=False, to_plot=["none"], data_path="",
             residual_p = {}
             # Compare with all other functionals
             for ref_functional in (f for f in functionals if f != functional):
-                dv = [dvxc.apply_dvxc_murnaghan(p, eos_fits[ref_functional]) \
+                dv = [rvo.apply_rvo_murnaghan(p, eos_fits[ref_functional]) \
                       for p in initial_p_values]
-                p = [dvxc.murnaghan_pressure(v + dv_v,
+                p = [rvo.murnaghan_pressure(v + dv_v,
                                              eos_fits[test_functional]) \
                      for (v, dv_v) in zip(initial_v_values, dv)]
                 delta_v.update({ref_functional: dv})
                 residual_p.update({ref_functional: p})     
-                dvxc_results.update({test_functional: DvxcResult(
+                rvo_results.update({test_functional: RvoResult(
                     test_functional, delta_v, residual_p)})
 
-        if "dvxc" in to_write:
+        if "rvo" in to_write:
             ### write out table of delta p xc corrections ###
-            out_filename = "{0}_dvxc.csv".format(output_prefix)
+            out_filename = "{0}_rvo.csv".format(output_prefix)
             vprint("  --> Writing to file {0}...".format(out_filename))
             with open(out_filename, 'w') as f:        
                 csv_writer = csv.writer(f, delimiter = ',')
@@ -165,13 +164,13 @@ def main(verbosity=False, to_plot=["none"], data_path="",
                                      "v / AA^3", "p / kbar", "Delta V / AA^3", 
                                      "residual pressure / kbar"])
                 for test_functional in functionals:
-                    for ref_functional in dvxc_results[test_functional].delta_v:
+                    for ref_functional in rvo_results[test_functional].delta_v:
                         # Zip together numbers and concatenate to labels
                         for row in zip(
                             data[test_functional].v_values,
                     data[test_functional].p_values,
-                    dvxc_results[test_functional].delta_v[ref_functional],
-                    dvxc_results[test_functional].residual_p[ref_functional]
+                    rvo_results[test_functional].delta_v[ref_functional],
+                    rvo_results[test_functional].residual_p[ref_functional]
                         ):
                         # print(row)
                         # print(list(row))
@@ -185,7 +184,7 @@ def main(verbosity=False, to_plot=["none"], data_path="",
         for functional in functionals:
             iter_results.update({functional:{}})
             for ref_functional in (f for f in functionals if f!= functional):
-                iter_result = sim_iterative_dvpx(eos_fits[functional],
+                iter_result = sim_iterative_rvo(eos_fits[functional],
                                                  eos_fits[ref_functional],
                                                  max_iter=5)
                 iter_results[functional].update({ref_functional:iter_result})
@@ -206,7 +205,7 @@ def main(verbosity=False, to_plot=["none"], data_path="",
                                    filename, mode='volume')
 
         ### Sensitivity to initial distance ###
-        # Calculate volume shift corresponding to a dvxc calculation at each
+        # Calculate volume shift corresponding to an RVO calculation at each
         # point of one data set, calculate residual pressure associated with
         # this point from fit
         iterations = 4
@@ -488,10 +487,10 @@ def plot_EVP_data(functionals, evp_data, eos_fits, plot_filename=False,
         plt.show()
     plt.close()
 
-def sim_iterative_dvpx(test_functional_murnaghan_fit,
+def sim_iterative_rvo(test_functional_murnaghan_fit,
                        ref_functional_murnaghan_fit,
                        max_iter = 5):
-    """Simulate the iterative application of delta V xc procedure
+    """Simulate the iterative application of RVO procedure
 
     Rather than carry out new calculations for every combination of
     functionals, we use a Murnaghan fit for both the test functional and the
@@ -506,8 +505,8 @@ def sim_iterative_dvpx(test_functional_murnaghan_fit,
             to be minimised. (i.e. results from an expensive DFT functional.)
 
         ref_functional_murnaghan_fit: a corresponding MurnaghanFit namedtuple,
-            parameterising an EoS to be used in the delta V_xc correction.
-            (i.e. results from an inexpensive DFT functional.)
+            parameterising an EoS to be used in the RVO correction.
+            (e.g. results from an inexpensive DFT functional.)
 
         max_iter: Integer number of iterative steps to carry out.
 
@@ -529,14 +528,14 @@ def sim_iterative_dvpx(test_functional_murnaghan_fit,
 
     # Initialise arrays and variables
     v = ref_functional_murnaghan_fit.v0
-    p = dvxc.murnaghan_pressure(v, test_functional_murnaghan_fit)
+    p = rvo.murnaghan_pressure(v, test_functional_murnaghan_fit)
     v_iterations = [v] + [False]*(max_iter)
     p_iterations = [p] + [False]*(max_iter)
 
     for index in range(1,max_iter+1):
-        delta_v = dvxc.apply_dvxc_murnaghan(p, ref_functional_murnaghan_fit)
+        delta_v = rvo.apply_rvo_murnaghan(p, ref_functional_murnaghan_fit)
         v = v + delta_v
-        p = dvxc.murnaghan_pressure(v, test_functional_murnaghan_fit)
+        p = rvo.murnaghan_pressure(v, test_functional_murnaghan_fit)
         v_iterations[index] = v
         p_iterations[index] = p
 
@@ -544,7 +543,7 @@ def sim_iterative_dvpx(test_functional_murnaghan_fit,
 
 def plot_iterative_results(functionals, iter_results, eos_fits,
                            filename, mode='pressure', n_columns=3):
-    """Plot values from iterative application of dvxc
+    """Plot values from iterative application of RVO
 
     Arguments:
         functionals: list of functionals to include in plot
@@ -713,8 +712,8 @@ def v_sensitivity(test_functional_fit, ref_functional_fit,
     v_corrected = []
     v = v_init.copy()
     for i in range(iterations):
-        p = dvxc.murnaghan_pressure(v, test_functional_fit)
-        delta_v = dvxc.apply_dvxc_murnaghan(p, ref_functional_fit)
+        p = rvo.murnaghan_pressure(v, test_functional_fit)
+        delta_v = rvo.apply_rvo_murnaghan(p, ref_functional_fit)
         v = v + delta_v
         v_corrected.append(v)
 
@@ -861,7 +860,7 @@ def plot_bandgaps(materials,do_plot=True,do_write=False,plot_filename=False,
 
 if __name__ == "__main__":
     import argparse
-    parser = argparse.ArgumentParser(description="Simulate application of DVXC method to a dataset of binary chalcogenides.")
+    parser = argparse.ArgumentParser(description="Simulate application of RVO method to a dataset of binary chalcogenides.")
     parser.add_argument("data_directory", help="path to 'binary_chalcogenides' folder")
     parser.add_argument("-v", "--verbose", help="increase output verbosity",
                         action="store_true")
@@ -871,7 +870,7 @@ if __name__ == "__main__":
                         nargs='*', default=["all"],
                         help="Output plots")
     parser.add_argument("-w", "--write",
-                        choices=["eos","dvxc","iterative_p","v_bandgap",
+                        choices=["eos","rvo","iterative_p","v_bandgap",
                                  "v_sensitivity","none","all"],
                         nargs='*', default=["all"],
                         help="Write CSV files")

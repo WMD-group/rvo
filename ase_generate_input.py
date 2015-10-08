@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 
 """
-Handy little script for generating DVXC input. Requires a set of output files compatible with the Atomic Simulation Environment.
+Handy little script for generating RVO input. Requires a set of output files compatible with the Atomic Simulation Environment.
 
 """
 
@@ -18,7 +18,7 @@ def main(paths):
         print ''
 
 if __name__ == "__main__":
-    parser=argparse.ArgumentParser(description='Generate 10-column input file for DVXC from given quantum chemistry calculation files')
+    parser=argparse.ArgumentParser(description='Generate 10-column input file for RVO from given quantum chemistry calculation files')
     parser.add_argument('paths', nargs='+')
     args = parser.parse_args()
     main(args.paths)

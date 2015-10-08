@@ -1,8 +1,9 @@
 #! /usr/bin/env python
+# -*- coding: utf-8 -*-
 
-#dvxc.py
+#rvo.py
 
-# Copyright 2014 Jonathan M. Skelton and Adam J. Jackson
+# Copyright 2015 Jonathan M. Skelton and Adam J. Jackson
 
 #COMMENT: EoS data should be a CSV file with each row containing (V, E, p), and no header rows.
 #COMMENT: We use VASP, so we assume V is in A^3, E is in eV, and p is in kbar.
@@ -10,7 +11,7 @@
 #COMMENT: An example :-
 # For reference, with the PBEsol EoS ("PbS-EoS-PBEsol.csv"), v0 = 50.86 A^3.
 # With HSE 06, the pressure at this volume is 26.24 kbar (2.62 GPa).
-# One iteration of dvxc gives a Delta V_xc of 2.28 A^3, and hence a predicted HSE 06 equilibrium volume of 53.14 A^3.
+# One iteration of RVO gives a Delta V of 2.28 A^3, and hence a predicted HSE 06 equilibrium volume of 53.14 A^3.
 # The correct value (from a HSE 06 EoS fitting) is 52.97 A^3, and the pressure at the corrected volume is -2.03 kbar (-0.2 GPa).
 
 
@@ -75,7 +76,7 @@ def murnaghan_pressure(v, fit):
     p = p * EVPerCubicAngstromInGPa * 10 # Convert to kbar / A3
     return p
     
-def apply_dvxc_murnaghan(pressure, murnaghan_params):
+def apply_rvo_murnaghan(pressure, murnaghan_params):
     """
     Estimate volume change to minimise absolute pressure, given reference fit to Murnaghan EoS
 
@@ -329,14 +330,14 @@ def main(filename, pressure, current_volume):
     print("Performing dVxc...")
 
 
-    DVxc_Murnaghan = apply_dvxc_murnaghan(pressure, murnaghan_params)
-    print("  -> Your volume offset (\"DeltaVxc\") by Murnaghan fitting is:")
-    print("      ---> ** DVxc = {0:.2f} A^3 ** <---".format(DVxc_Murnaghan))
+    rvo_murnaghan = apply_rvo_murnaghan(pressure, murnaghan_params)
+    print("  -> Your volume offset by Murnaghan fitting is:")
+    print("      ---> ** Delta V = {0:.2f} A^3 ** <---".format(rvo_murnaghan))
     print('')
 
     if current_volume and not lattice_vectors:
         print("  -> Proposed volume of improved cell:" +
-              "{0:.3f} A^3 ".format(current_volume + DVxc_Murnaghan))
+              "{0:.3f} A^3 ".format(current_volume + rvo_murnaghan))
     elif lattice_vectors and not current_volume:
         print("You have provided lattice vectors as part of the \n"
               "reference data. If you provide the volume of the \n"
@@ -344,21 +345,21 @@ def main(filename, pressure, current_volume):
               "can estimate new lattice vectors by interpolating to\n"
               "the target volume. \n")
     elif lattice_vectors and current_volume:
-        target_volume = current_volume + DVxc_Murnaghan
+        target_volume = current_volume + rvo_murnaghan
         estimate_vectors(lattice_vectors, target_volume,
                          vValues, verbose=True)
     
     if pValues != False:
-        print("Saving a plot of the dVxc EoS fit to \"Fit.png\"...")
+        print("Saving a plot of the RVO EoS fit to \"Fit.png\"...")
         _SaveVPFitPlot(pValues, vValues, murnaghan_params, "Fit.png")
     
         print('')        
 
-    print("Thank you for using dVxc!")
+    print("Thank you for using RVO!")
     print('')
     
-    print("There isn't a dVxc paper yet, but in the meantime you could cite:")
-    print("J. Buckeridge et al., Comp. Phys. Commun. 185, 330-338 (2014)")
+    print('You can find a draft of the accompanying paper at http://arxiv.org/abs/1507.08815')
+    print("(Note that the name of the procedure has been changed from ΔVxc following reviewer feedback.)")
     print('')
 
 if __name__ == "__main__":
@@ -369,7 +370,7 @@ if __name__ == "__main__":
         pass
 
     import argparse
-    parser = argparse.ArgumentParser(description="Delta V_xc; affordable volume corrections for high-level DFT calculations")
+    parser = argparse.ArgumentParser(description="RVO; affordable volume corrections for high-level DFT calculations")
     parser.add_argument('-f', '--file', action="store", type=str,
                         dest="filename", default=False,
                         help=("csv file containing E-V curve with functional A"+
