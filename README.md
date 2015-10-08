@@ -1,6 +1,6 @@
 # RVO: Rapid volume optimisation with an auxiliary equation of state #
 
-[![DOI](https://zenodo.org/badge/14127/WMD-Bath/dvxc.svg)](https://zenodo.org/badge/latestdoi/14127/WMD-Bath/dvxc)
+[![DOI](https://zenodo.org/badge/14127/WMD-Bath/rvo.svg)](https://zenodo.org/badge/latestdoi/14127/WMD-Bath/rvo)
 
 ## Introduction ##
 
